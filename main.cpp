@@ -13,7 +13,8 @@
 using namespace std;
 
 // Function prototypes
-char* toPostfix(char *infix);
+char* toPostfix (char *infix);
+bool isOperator (char t);
 int precedence (char o);
 
 int main() {
@@ -45,28 +46,21 @@ char* toPostfix(char *infix) {
         }
         
         // Check if the character is an integer
-        if (isdigit(infix[iInfix])){
-            while (isdigit(infix[iInfix])){
+        if (isdigit(infix[iInfix])) {
+            while (isdigit(infix[iInfix])) {
                 postfix[iPostfix++] = infix[iInfix++];
             }
             postfix[iPostfix++] = ' ';
         }
         
         // Check if the character is an operator
-        else if (infix[iInfix] == '+' || infix[iInfix] == '-' || 
-                 infix[iInfix] == '*' || infix[iInfix] == '/' || 
-                 infix[iInfix] == '^') {
-            
-            while ((s.peek() == '+' || s.peek() == '-' || 
-                   s.peek() == '*' || s.peek() == '/' || 
-                   s.peek() == '^') && 
-                   ((infix[iInfix] != '^') &&  
-                    (precedence(infix[iInfix]) <= precedence(s.peek()))) || 
-                   ((infix[iInfix] == '^') && 
-                    (precedence(infix[iInfix]) < precedence(s.peek())))) {
+        else if (isOperator(infix[iInfix])) {
+            while (isOperator(s.peek()) &&
+               ((infix[iInfix] != '^' && precedence(infix[iInfix]) <= precedence(s.peek()))
+            || (infix[iInfix] == '^' && precedence(infix[iInfix]) < precedence(s.peek())))) {
                 postfix[iPostfix++] = s.pop();
                 postfix[iPostfix++] = ' ';
-            }           
+            }
             s.push(infix[iInfix++]);
         }
         
@@ -81,23 +75,27 @@ char* toPostfix(char *infix) {
                 postfix[iPostfix++] = s.pop();
                 postfix[iPostfix++] = ' ';
                 if (s.peek() == 0) {
-                    cout << "The parantheses are mismatched." << endl;
+                    cout << "Error: mismatched parentheses." << endl;
                     break;
                 }
             }
             s.pop();
             iInfix++;
         }
-        
-        // Infix expression has been parsed completely!
-        while (s.peek()) {
-            postfix[iPostfix++] = s.pop();
-            postfix[iPostfix++] = ' ';
-        }
-        postfix[iPostfix - 1] = 0;
-        
-        return postfix;
     }
+    
+    // Infix expression has been parsed completely!
+    while (s.peek()) {
+        postfix[iPostfix++] = s.pop();
+        postfix[iPostfix++] = ' ';
+    }
+    postfix[iPostfix - 1] = 0;
+    
+    return postfix;
+}
+
+bool isOperator (char t) {
+    return t == '+' || t == '-' || t =='*' || t =='/' || t == '^';
 }
 
 int precedence (char o) {
