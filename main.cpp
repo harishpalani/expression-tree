@@ -9,26 +9,91 @@
 #include <iostream>
 #include <cstring>
 #include "Stack.h"
+#include "Stack2.h"
 
 using namespace std;
+
+struct BinaryNode {
+    char* c;
+    BinaryNode* left = NULL, *right = NULL;
+    ~BinaryNode() {
+        delete[] c;
+    }
+};
 
 // Function prototypes
 char* toPostfix (char *infix);
 bool isOperator (char t);
 int precedence (char o);
 
+BinaryNode* getTree(Stack2 &postfix);
+void prefix(BinaryNode* node);
+void postfix(BinaryNode* node);
+void infix(BinaryNode* node);
+void deleteTree(BinaryNode* node);
+
 int main() {
-    char infix[128];
+    char in[128];
+    char input[128];
+    
     while (true) {
         // Get infix expression
         cout << "Enter an infix expression: ";
-        cin.getline(infix, 128);
-        cout << "Infix: " << infix << endl;
+        cin.getline(in, 128);
+        cout << "Infix: " << in << endl;
         
-        // Convert infix to postfix & display
-        char* postfix = toPostfix(infix);
-        cout << "Postfix: " << postfix << endl;
-        delete[] postfix;
+        // Convert infix to postfix
+        char* post = toPostfix(in);
+        
+        // + Expression Tree
+        Stack2 s2;
+        int i = 0;
+        
+        while (post[i]) {
+            if (post[i] == ' ') {
+                i++;
+                continue;
+            }
+            
+            if (isdigit(post[i])) {
+                char n[10];
+                int j = 0;
+                while (isdigit(post[i])) {
+                    n[j++] = post[i++];
+                }
+                n[j++] = '\0';
+                s2.push(n);
+            }
+            
+            else {
+                char o[2] = { post[i++], '\0' };
+                s2.push(o);
+            }
+        }
+        
+        delete[] post;
+        BinaryNode* root = getTree(s2); // Get expression tree
+        
+        cout << "Would you like your output in prefix, postfix, or infix?" << endl;
+        cin.getline(input, 128);
+        
+        for (int i = 0; input[i]; i++) {
+            input[i] = tolower(input[i]);
+        }
+        
+        if (strcmp(input, "prefix") == 0) {
+            prefix(root);
+            cout << endl;
+        } else if(strcmp(input, "postfix") == 0) {
+            postfix(root);
+            cout << endl;
+        } else {
+            infix(root);
+            cout << endl;
+        } 
+        
+        // Delete the expression tree
+        deleteTree(root);
     }
     return 0;
 }
@@ -103,4 +168,70 @@ int precedence (char o) {
     if (o == '*' || o == '/') { return 1; }
     if (o == '^') { return 2; }
     return -1;
+}
+
+BinaryNode* getTree(Stack2 &postfix) {
+    if (isOperator(*postfix.peek())) {
+        BinaryNode* binaryNode = new BinaryNode();
+        binaryNode->c = postfix.pop();
+        binaryNode->right = getTree(postfix);
+        binaryNode->left = getTree(postfix);
+        return binaryNode;
+    } else {
+        BinaryNode* binaryNode = new BinaryNode();
+        binaryNode->c = postfix.pop();
+        return binaryNode;
+    }
+}
+
+void prefix(BinaryNode* node) {
+    if (isOperator(*(node->c))) {
+        cout << node->c << ' ';
+        prefix(node->left);
+        prefix(node->right);
+    } else {
+        cout << node->c << ' ';
+    }
+}
+
+void postfix(BinaryNode* node) {
+    if (isOperator(*(node->c))) {
+        postfix(node->left);
+        postfix(node->right);
+        cout << node->c << ' ';
+    } else {
+        cout << node->c << ' ';
+    }
+}
+
+void infix(BinaryNode* node) {
+    if (isOperator(*(node->c))) {
+        if (isOperator(*(node->left->c))) {
+            cout << "( ";
+            infix(node->left);
+            cout << ") ";
+        } else {
+            infix(node->left);
+        }
+        
+        cout << node->c << ' ';
+        
+        if (isOperator(*(node->right->c))) {
+            cout << "( ";
+            infix(node->right);
+            cout << ") ";
+        } else {
+            infix(node->right);
+        }
+    } else {
+        cout << node->c << ' ';
+    }
+}
+
+void deleteTree(BinaryNode* node){
+    if (node) {
+        deleteTree(node->left);
+        deleteTree(node->right);
+        delete node;
+    }
 }

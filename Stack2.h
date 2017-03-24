@@ -10,8 +10,8 @@ struct Node2 {
 
 class Stack2 {
     public:
-        char peek();
-        char pop();
+        char* peek();
+        char* pop();
         void push(char* c);
     
     private:

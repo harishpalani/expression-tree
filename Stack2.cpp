@@ -1,11 +1,12 @@
 #include "Stack2.h"
+#include <cstring>
 
-char Stack2::peek() {
+char* Stack2::peek() {
     if (head == NULL) { return NULL; } 
     return head->c;
 }
 
-char Stack2::pop() {
+char* Stack2::pop() {
     if (head != NULL) {
         char* temp = new char[8];
         strcpy(temp, head->c);
