@@ -1,10 +1,10 @@
 /**
- * Shunting Yard Algorithm
- * Translating mathematical expressions from infix to postfix notation, 
- * considering basic arithmetic expressions, integers, and parantheses.
+ * Expression Tree
+ * Building expression trees to convert expressions to 
+ * prefix, infix, or postfix notation
  * 
  * @author Harish Palani
- * @version February 2017
+ * @version March 2017
  */
 #include <iostream>
 #include <cstring>
@@ -16,16 +16,14 @@ using namespace std;
 struct BinaryNode {
     char* c;
     BinaryNode* left = NULL, *right = NULL;
-    ~BinaryNode() {
-        delete[] c;
-    }
 };
 
 // Function prototypes
+// + Shunting Yard
 char* toPostfix (char *infix);
 bool isOperator (char t);
 int precedence (char o);
-
+// + Expression Tree
 BinaryNode* getTree(Stack2 &postfix);
 void prefix(BinaryNode* node);
 void postfix(BinaryNode* node);
@@ -46,15 +44,17 @@ int main() {
         char* post = toPostfix(in);
         
         // + Expression Tree
-        Stack2 s2;
-        int i = 0;
+        Stack2 s2; // Create new stack for strings
         
+        int i = 0;
         while (post[i]) {
+            // Iterate through if it's a space
             if (post[i] == ' ') {
                 i++;
                 continue;
             }
             
+            // If it's a number, load it into the stack
             if (isdigit(post[i])) {
                 char n[10];
                 int j = 0;
@@ -63,9 +63,7 @@ int main() {
                 }
                 n[j++] = '\0';
                 s2.push(n);
-            }
-            
-            else {
+            } else {
                 char o[2] = { post[i++], '\0' };
                 s2.push(o);
             }
@@ -76,21 +74,15 @@ int main() {
         
         cout << "Would you like your output in prefix, postfix, or infix?" << endl;
         cin.getline(input, 128);
-        
         for (int i = 0; input[i]; i++) {
-            input[i] = tolower(input[i]);
+            input[i] = tolower(input[i]); // Just to be sure, convert input to lowercase
         }
         
-        if (strcmp(input, "prefix") == 0) {
-            prefix(root);
-            cout << endl;
-        } else if(strcmp(input, "postfix") == 0) {
-            postfix(root);
-            cout << endl;
-        } else {
-            infix(root);
-            cout << endl;
-        } 
+        if (strcmp(input, "prefix") == 0) { prefix(root); } 
+        else if(strcmp(input, "postfix") == 0) { postfix(root); } 
+        else { infix(root); } 
+        
+        cout << endl;
         
         // Delete the expression tree
         deleteTree(root);
@@ -170,6 +162,7 @@ int precedence (char o) {
     return -1;
 }
 
+// Build an expression tree
 BinaryNode* getTree(Stack2 &postfix) {
     if (isOperator(*postfix.peek())) {
         BinaryNode* binaryNode = new BinaryNode();
@@ -184,6 +177,7 @@ BinaryNode* getTree(Stack2 &postfix) {
     }
 }
 
+// Output expression in prefix notation
 void prefix(BinaryNode* node) {
     if (isOperator(*(node->c))) {
         cout << node->c << ' ';
@@ -194,6 +188,7 @@ void prefix(BinaryNode* node) {
     }
 }
 
+// Output expression in postfix notation
 void postfix(BinaryNode* node) {
     if (isOperator(*(node->c))) {
         postfix(node->left);
@@ -204,27 +199,28 @@ void postfix(BinaryNode* node) {
     }
 }
 
+// Output expression in infix notation
 void infix(BinaryNode* node) {
     if (isOperator(*(node->c))) {
         if (isOperator(*(node->left->c))) {
-            cout << "( ";
+            cout << "(";
             infix(node->left);
-            cout << ") ";
+            cout << ")";
         } else {
             infix(node->left);
         }
         
-        cout << node->c << ' ';
+        cout << node->c;
         
         if (isOperator(*(node->right->c))) {
-            cout << "( ";
+            cout << "(";
             infix(node->right);
-            cout << ") ";
+            cout << ")";
         } else {
             infix(node->right);
         }
     } else {
-        cout << node->c << ' ';
+        cout << node->c;
     }
 }
 
